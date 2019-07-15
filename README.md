@@ -1,2 +1,2 @@
-# Robozinho_mau
+# Cosmos
 Bot para funcionalidades tradisticas
