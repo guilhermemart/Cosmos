@@ -367,14 +367,14 @@ if __name__ == '__main__':  # Inicio
     temp = len(cube[0][:][:])
     while prob_acertos < 0.65:
         while probabilidade_minima < 0.15 and retrying <= 5:
-            if (argprobmin != -1):
+            if (argprobmin == -1):
                 tratados = [0 for i in range(30)]
                 refaz_neuronios_pouco_usados(tratados, brain, cube, trying)
                 tupla2 = aproxima_brain(cube, brain, tratados)
                 print(f"elementos tratados: {sum(tratados)}")
                 print(f'utilização do neuronio menos usado: {min(tratados)}')
                 print(f'Aproximacoes (parcial): {trying}')
-            while ((refaz_neuronios_pouco_usados(tratados, brain, cube, trying) == False) and (trying < 5)):
+            while ((refaz_neuronios_pouco_usados(tratados, brain, cube, trying) == False) and (trying <= 5)):
                 tratados = [0 for i in range(30)]
                 tupla2 = aproxima_brain(cube, brain, tratados)
                 trying += 1
@@ -384,7 +384,7 @@ if __name__ == '__main__':  # Inicio
                 print(f"elementos tratados: {sum(tratados)}")
                 print(f'utilização do neuronio menos usado: {min(tratados)}')
                 print(f'Aproximacoes (parcial): {trying}')
-            trying = 0
+            trying = 4
             n_elementos[:] = n_proximos_brain(brain, cube)
             # print(f'n_elementos:  {n_elementos}')
             dist_media[:] = DistMedia(n_elementos)
@@ -417,6 +417,7 @@ if __name__ == '__main__':  # Inicio
             temp += buy_sell_acertos[0]
         prob_acertos = (acertos / temp)
         print(f' ***** prob_de_acertos *****: {prob_acertos}')
+        print(f'hora local {time.time()}')
         retrying = 4
 
     # print(f'Probabilidade_compra_venda: {prob}')
