@@ -366,7 +366,7 @@ if __name__ == '__main__':  # Inicio
     prob_acertos = 0
     temp = len(cube[0][:][:])
     while prob_acertos < 0.65:
-        while probabilidade_minima < 0.15 and retrying <= 5:
+        while probabilidade_minima < 0.15 or retrying <= 5:
             if (argprobmin == -1):
                 tratados = [0 for i in range(30)]
                 refaz_neuronios_pouco_usados(tratados, brain, cube, trying)
@@ -374,7 +374,7 @@ if __name__ == '__main__':  # Inicio
                 print(f"elementos tratados: {sum(tratados)}")
                 print(f'utilização do neuronio menos usado: {min(tratados)}')
                 print(f'Aproximacoes (parcial): {trying}')
-            while ((refaz_neuronios_pouco_usados(tratados, brain, cube, trying) == False) and (trying <= 5)):
+            while ((refaz_neuronios_pouco_usados(tratados, brain, cube, trying) == False) or (trying <= 5)):
                 tratados = [0 for i in range(30)]
                 tupla2 = aproxima_brain(cube, brain, tratados)
                 trying += 1
@@ -419,7 +419,7 @@ if __name__ == '__main__':  # Inicio
         print(f' ***** prob_de_acertos *****: {prob_acertos}')
         print(f'hora local {time.time()}')
         retrying = 4
-
+        trying = 4
     # print(f'Probabilidade_compra_venda: {prob}')
     print(f' ***** prob_de_acertos *****: {prob_acertos}')
     print(f"quantidade de operacoes: {temp}")
