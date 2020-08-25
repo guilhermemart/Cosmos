@@ -1,3 +1,4 @@
+# coding: utf-8
 # import csv
 import numpy as np
 from datetime import datetime
@@ -367,7 +368,7 @@ if __name__ == '__main__':  # Inicio
     temp = len(cube[0][:][:])
     while prob_acertos < 0.65:
         while probabilidade_minima < 0.15 or retrying <= 5:
-            if (argprobmin == -1):
+            if argprobmin == -1:
                 tratados = [0 for i in range(30)]
                 refaz_neuronios_pouco_usados(tratados, brain, cube, trying)
                 tupla2 = aproxima_brain(cube, brain, tratados)
@@ -377,14 +378,13 @@ if __name__ == '__main__':  # Inicio
             while ((refaz_neuronios_pouco_usados(tratados, brain, cube, trying) == False) or (trying <= 5)):
                 tratados = [0 for i in range(30)]
                 tupla2 = aproxima_brain(cube, brain, tratados)
-                trying += 1
                 if trying % 3 == 0:
                     save_brain(brain, mycursor, mydb)
                 mydb.commit()
                 print(f"elementos tratados: {sum(tratados)}")
                 print(f'utilização do neuronio menos usado: {min(tratados)}')
                 print(f'Aproximacoes (parcial): {trying}')
-            trying = 4
+                trying += 1
             n_elementos[:] = n_proximos_brain(brain, cube)
             # print(f'n_elementos:  {n_elementos}')
             dist_media[:] = DistMedia(n_elementos)
@@ -405,7 +405,9 @@ if __name__ == '__main__':  # Inicio
                     menos_provaveis[i] = 0
                     # funciona igual os elementos tratados, mas faz o
                     # neuronio com menor probabilidade ser o menor forcadamente
+            tratados[:] = menos_provaveis[:]
             retrying += 1
+            trying = 4
             total = 0
         acertos = 0
         n_elementos[:] = n_proximos_brain(brain, cube)
