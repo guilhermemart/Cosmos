@@ -94,7 +94,7 @@ def read_create_brain(brain,mycursor,cube):
             mycursor.execute(my_insert)
             i += 1
             brain0.append(temp0[:])
-            temp0=cube[0][10+i][:]
+            temp0 = cube[0][10+i][:]
 
     try:
         mycursor.execute("select * from brain1")

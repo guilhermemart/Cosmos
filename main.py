@@ -20,10 +20,10 @@ from saver_ import read_create_brain
 # retorna true se a nova distancia for menor do que a distancia inicial
 def aproxima_neuronio(id_elemento, id_neuronio, cube, brain, tentativa=1):
     try:
-        alpha = 1 / (1 + tentativa % 5)  # ToDo maior quantidadde de aproximações, menor porcentagem de atualização
-        # alpha=1
+        #  alpha = 1 / (1 + tentativa % 5)  # ToDo maior quantidadde de aproximações, menor porcentagem de atualização
+        alpha = 5
     except:
-        alpha = 1
+        alpha = 5
     # nova_dist = 0
     # velha_dist = 0
     j = 0
@@ -33,7 +33,7 @@ def aproxima_neuronio(id_elemento, id_neuronio, cube, brain, tentativa=1):
             # velha_dist=pow(brain[i][id_neuronio][j]-cube[i][id_elemento][j],2)
             brain[i][id_neuronio][j] = (1 - (alpha * 0.02)) * brain[i][id_neuronio][j] + alpha * 0.02 * (
                 cube[i][id_elemento][j])
-            brain[i][id_neuronio][j] = min(max(brain[i][id_neuronio][j], -14), 14)
+            brain[i][id_neuronio][j] = min(max(brain[i][id_neuronio][j], -30), 30)
             # nova_dist+=pow(brain[i][id_neuronio][j]-cube[i][id_elemento][j],2)
             j += 1
         i += 1
@@ -167,13 +167,13 @@ def montar_cubo(dol, cube=[]):
     cube.append(frame[1:-5])
     cube.append(frame[:-6])
     k = len(cube[0][:][:])-1
-    while k >= 0:
+    '''while k >= 0:
         if abs(cube[5][k][0]) < 2:
             for w in range(0, 6):
                 cube[w].pop(k)
             k -= 1
         else:
-            k -= 1
+            k -= 1'''
 
     print(f"cubo loaded. n elementos: {len(cube[0][:][:])}")
     return cube
@@ -204,7 +204,7 @@ def aproxima_brain(cube, brain, tratados=[]):
 def randomiza_neuronio(k, brain):
     for i in range(0, 6):
         for j in range(0, 12):
-            brain[i][k][j] += ((random.random() - 0.5) / 50)
+            brain[i][k][j] += ((random.random() - 0.5) / 15)
 
 
 # reajusta o neuronio menos usado
@@ -215,14 +215,16 @@ def refaz_neuronios_pouco_usados(tratados_list, brain, cube, trying):
     if alfa < (np.max(tratados) * 0.1):  # 10% do maior neuronio
         k = tratados.argmin()
         print(f"recriando neuronio {k}")
-        neuron = []
-        temp = 0
-        j = 0
         i = random.randint(0, 20)  # aproxima aleatoriamente de varios inputs
         while i < len(cube[0][:][:]):
             aproxima_neuronio(i, k, cube, brain, trying)
-            i += random.randint(0, 20)
+            i += 1  #random.randint(0, 5)
         randomiza_neuronio(k, brain)
+        alfa = np.max(tratados)
+        if alfa > (np.min(tratados) * 2):  # 200% do menor neuronio
+            k = tratados.argmax()
+            print(f"aleatorizando neuronio {k}")
+            randomiza_neuronio(k, brain)
         return False
     return True
 
@@ -383,7 +385,7 @@ if __name__ == '__main__':  # Inicio
                 print(f"elementos tratados: {sum(tratados)}")
                 print(f'utilização do neuronio menos usado: {min(tratados)}')
                 print(f'Aproximacoes (parcial): {trying}')
-            while ((refaz_neuronios_pouco_usados(tratados, brain, cube, trying) == False) and trying < 5) or trying <= 5:
+            while ((refaz_neuronios_pouco_usados(tratados, brain, cube, trying) is False) and trying < 5) or trying <= 5:
                 tratados = [0 for i in range(30)]
                 tupla2 = aproxima_brain(cube, brain, tratados)
                 if trying % 3 == 0:
@@ -391,6 +393,7 @@ if __name__ == '__main__':  # Inicio
                 mydb.commit()
                 print(f"elementos tratados: {sum(tratados)}")
                 print(f'utilização do neuronio menos usado: {min(tratados)}')
+                print(tratados)
                 print(f'Aproximacoes (parcial): {trying}')
                 trying += 1
             n_elementos[:] = n_proximos_brain(brain, cube)
@@ -430,9 +433,9 @@ if __name__ == '__main__':  # Inicio
         else:
             prob_acertos = 0
         print(f' ***** prob_de_acertos *****: {prob_acertos}')
-        print(f'hora local {time.time()}')
-        retrying = 4 # executa mais de uma vez o ciclo para envolver os cases
-        trying = 4   # probabilidade de acertos, probabilidade comum, e utilizacao menor
+        print(f'hora local {time.localtime()}')
+        retrying = 3  # executa mais de uma vez o ciclo para envolver os cases
+        trying = 3   # probabilidade de acertos, probabilidade comum, e utilizacao menor
     # print(f'Probabilidade_compra_venda: {prob}')
     print(f' ***** prob_de_acertos *****: {prob_acertos}')
     print(f"quantidade de operacoes: {temp}")
