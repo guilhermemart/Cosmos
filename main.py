@@ -12,6 +12,7 @@ import multiprocessing as mp
 # from numba import jit
 import random
 import time
+import math
 from saver_ import save_brain
 from saver_ import read_create_brain
 
@@ -19,7 +20,6 @@ from saver_ import read_create_brain
 # recebe o elemento do cubo e o neuronio a ser aproximado e aproxima proporcianal a menor distancia
 # retorna true se a nova distancia for menor do que a distancia inicial
 def aproxima_neuronio(id_elemento, id_neuronio, cube, brain, tentativa=1):
-    alpha = 1
     try:
         alpha = 1 / (1 + tentativa % 5)  # ToDo maior quantidadde de aproximações, menor porcentagem de atualização
         # alpha=1
@@ -32,8 +32,9 @@ def aproxima_neuronio(id_elemento, id_neuronio, cube, brain, tentativa=1):
     while i < 6:
         while j < 12:
             # velha_dist=pow(brain[i][id_neuronio][j]-cube[i][id_elemento][j],2)
-            brain[i][id_neuronio][j] = (1 - (alpha * 0.02)) * brain[i][id_neuronio][j] + (alpha) * 0.02 * (
+            brain[i][id_neuronio][j] = (1 - (alpha * 0.02)) * brain[i][id_neuronio][j] + alpha * 0.02 * (
                 cube[i][id_elemento][j])
+            brain[i][id_neuronio][j] = min(max(brain[i][id_neuronio][j], -6), 6)
             # nova_dist+=pow(brain[i][id_neuronio][j]-cube[i][id_elemento][j],2)
             j += 1
         i += 1
@@ -54,7 +55,7 @@ def dist_parcial_id(elemento, cube, brain, parcial, distancia):
     d0 = 0
     j = 0
     k = 0
-    pesos = (0.36, 0.49, 0.64, 0.81, 1, 0)  # n usar o ultimo elemento para calculo de distancia
+    pesos = (0.85, 0.9, 0.95, 0.98, 1, 0.5)  # n usar o ultimo elemento para calculo de distancia
     looping_end = 0  # o elemento do cubo deve decidir se o neuronio é de compra ou venda
     looping_start = 0  # no teste de probabilidade
 
@@ -69,7 +70,7 @@ def dist_parcial_id(elemento, cube, brain, parcial, distancia):
         for j in range(0, 5):  # elemento 6 será usado para definir compra ou venda
             for k in range(12):
                 d += pow(cube[j][elemento][k] - brain[j][brain_id][k], 2)
-            d *= pesos[j]
+            d = 6*pesos[j]*math.tanh(d/6)
             d0 += d
             d = 0
             try:
@@ -91,7 +92,7 @@ def dist_id_thread(elemento, cube, brain, distancia):
     p = mp.Pool(4)
     lista = [(elemento, cube, brain, 0, distancia), (elemento, cube, brain, 1, distancia),
              (elemento, cube, brain, 2, distancia), (elemento, cube, brain, 3, distancia)]
-    out = p.starmap_async(dist_parcial_id, lista).get()
+    out = p.starmap(dist_parcial_id, lista)
     imin = 0
     dmin = out[0][1]
     for i in range(1, len(out)):
@@ -100,11 +101,10 @@ def dist_id_thread(elemento, cube, brain, distancia):
             imin = i
     return imin, dmin
 
-
 # retorna o neuronio mais proximo do elemento
 # distancia[] armazena a distancia para uso futuro
 def dist_id(elemento, cube, brain, distancia=[], parcial=0):
-    # return dist_id_thread(elemento, cube, brain, distancia) #não deu certo usar threads
+    #return dist_id_thread(elemento, cube, brain, distancia) #não deu certo usar threads
     imin = 0
     d = 0
     d0 = 0
@@ -125,7 +125,7 @@ def dist_id(elemento, cube, brain, distancia=[], parcial=0):
             for j in range(0, 6):  # elemento 6 será usado para definir compra ou venda
                 for k in range(0, 12):
                     d += pow(cube[j][elemento][k] - brain[j][brain_id][k], 2)
-                d *= pesos[j]
+                d = pesos[j]*6*math.tanh(d/6)
                 d0 += d
                 d = 0
             dist.append(d0)
@@ -417,11 +417,14 @@ if __name__ == '__main__':  # Inicio
             buy_sell_acertos = teste_de_acertos(cube, brain, dist_media, i)
             acertos += buy_sell_acertos[1]
             temp += buy_sell_acertos[0]
-        prob_acertos = (acertos / temp)
+        if temp != 0:
+            prob_acertos = (acertos / temp)
+        else:
+            prob_acertos = 0
         print(f' ***** prob_de_acertos *****: {prob_acertos}')
         print(f'hora local {time.time()}')
-        retrying = 4 #executa mais de uma vez o ciclo para envolver os cases
-        trying = 4   #probabilidade de acertos, probabilidade comum, e utilizacao menor
+        retrying = 4 # executa mais de uma vez o ciclo para envolver os cases
+        trying = 4   # probabilidade de acertos, probabilidade comum, e utilizacao menor
     # print(f'Probabilidade_compra_venda: {prob}')
     print(f' ***** prob_de_acertos *****: {prob_acertos}')
     print(f"quantidade de operacoes: {temp}")
