@@ -34,6 +34,7 @@ def aproxima_neuronio(id_elemento, id_neuronio, cube, brain, tentativa=1):
             # velha_dist=pow(brain[i][id_neuronio][j]-cube[i][id_elemento][j],2)
             brain[i][id_neuronio][j] = (1 - (alpha * 0.02)) * brain[i][id_neuronio][j] + (alpha) * 0.02 * (
                 cube[i][id_elemento][j])
+            brain[i][id_neuronio][j] = max(min(brain[i][id_neuronio][j], 15), -15)
             # nova_dist+=pow(brain[i][id_neuronio][j]-cube[i][id_elemento][j],2)
             j += 1
         i += 1
@@ -95,7 +96,7 @@ def dist_id_thread(elemento, cube, brain, distancia):
     imin = 0
     dmin = out[0][1]
     for i in range(1, len(out)):
-        if (out[i][1] < dmin):
+        if out[i][1] < dmin:
             dmin = out[i][1]
             imin = i
     return imin, dmin
@@ -167,7 +168,15 @@ def montar_cubo(dol, cube=[]):
     cube.append(frame[2:-4])
     cube.append(frame[1:-5])
     cube.append(frame[:-6])
-    print("cubo loaded")
+    k = len(cube[0][:][:])-1
+    while k >= 0:  # corta do cubo os elementos que nao poderão ser padroes de venda ou de compra
+        if abs(cube[5][k][0]) < 2:
+            for w in range(0, 6):
+                cube[w].pop(k)
+        k -= 1
+
+
+    print(f"cubo loaded. n elementos: {len(cube[0][:][:])}")
     return cube
 
     # retorna um array com quantas vezes um neuronio foi aproximado
@@ -246,19 +255,20 @@ def DistMedia(n):
     return dist[:]
 
 
-# entra um array com o neuro de cada elemento e sua distancia do seu neuronio
-# entra distancia média de cada neuronio
-# retorna um array com os elementos analisaveis seu neuronio e compra ou venda
+#  entra um array com o neuro de cada elemento e sua distancia do seu neuronio
+#  entra distancia média de cada neuronio
+#  retorna um array com os elementos analisaveis seu neuronio e compra ou venda
+#  funcao para cortar elementos muito distantes do padrão do neuronio
 def Elementos_Analisaveis(n, dist, cube):
     out = []
     buy_sell = 0
     temp = []
     for i in range(0, len(cube[0][:][:])):
-        if (n[i][1]) <= 0.3 * dist[n[i][0]]:
+        if (n[i][1]) <= 0.3 * dist[n[i][0]]:  #30% dos elementos mais próximos de cada neurônio
             if (cube[5][i][0]) >= 1:
                 buy_sell = 1
             else:
-                if (cube[5][i][0] <= -1):
+                if cube[5][i][0] <= -1:
                     buy_sell = -1
                 else:
                     buy_sell = 0
@@ -412,11 +422,11 @@ if __name__ == '__main__':  # Inicio
         acertos = 0
         n_elementos[:] = n_proximos_brain(brain, cube)
         dist_media[:] = DistMedia(n_elementos)
-        temp = len(cube[0][:][:])
+        temp = len(cube[0][:][:]) + 0.0001  # valor bem pequeno para não ter divisão por zero
         for i in range(0, len(cube[0][:][:])):
             buy_sell_acertos = teste_de_acertos(cube, brain, dist_media, i)
             acertos += buy_sell_acertos[1]
-            temp += buy_sell_acertos[0]
+            temp += buy_sell_acertos[0]  # reduz um a cada elemento que nao é valido
         prob_acertos = (acertos / temp)
         print(f' ***** prob_de_acertos *****: {prob_acertos}')
         print(f'hora local {time.time()}')
