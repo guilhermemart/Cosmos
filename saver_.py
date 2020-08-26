@@ -79,22 +79,22 @@ def read_create_brain(brain,mycursor,cube):
             temp = []
             i += 1
             j = 0
-        k=len(brain0[0][:])
+        k = len(brain0[0][:])
     except:
         try:
             mycursor.execute("drop table brain0")
         except:
             print("tabela brain0 n existente, criando...")
         mycursor.execute("create table brain0(data0 VARCHAR(255),data1 VARCHAR(255),data2 VARCHAR(255),data3 VARCHAR(255),data4 VARCHAR(255),data5 VARCHAR(255),data6 VARCHAR(255),data7 VARCHAR(255),data8 VARCHAR(255),data9 VARCHAR(255),data10 VARCHAR(255),data11 VARCHAR(255))")
-        i=0
-        j=0
+        i = 0
+        j = 0
         temp0=cube[0][10][:12]
         while(i<30):
             my_insert = "INSERT INTO brain0(data0,data1,data2,data3,data4,data5,data6,data7,data8,data9,data10,data11) VALUES(1,1,1,1,1,1,1,1,1,1,1,1)"
             mycursor.execute(my_insert)
             i += 1
             brain0.append(temp0[:])
-            temp0=cube[0][10+i][:]
+            temp0 = cube[0][10+i][:]
 
     try:
         mycursor.execute("select * from brain1")
