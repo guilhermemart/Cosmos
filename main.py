@@ -12,7 +12,6 @@ import multiprocessing as mp
 # from numba import jit
 import random
 import time
-import math
 from saver_ import save_brain
 from saver_ import read_create_brain
 
@@ -34,7 +33,7 @@ def aproxima_neuronio(id_elemento, id_neuronio, cube, brain, tentativa=1):
             # velha_dist=pow(brain[i][id_neuronio][j]-cube[i][id_elemento][j],2)
             brain[i][id_neuronio][j] = (1 - (alpha * 0.02)) * brain[i][id_neuronio][j] + alpha * 0.02 * (
                 cube[i][id_elemento][j])
-            brain[i][id_neuronio][j] = min(max(brain[i][id_neuronio][j], -6), 6)
+            brain[i][id_neuronio][j] = min(max(brain[i][id_neuronio][j], -14), 14)
             # nova_dist+=pow(brain[i][id_neuronio][j]-cube[i][id_elemento][j],2)
             j += 1
         i += 1
@@ -70,7 +69,7 @@ def dist_parcial_id(elemento, cube, brain, parcial, distancia):
         for j in range(0, 5):  # elemento 6 será usado para definir compra ou venda
             for k in range(12):
                 d += pow(cube[j][elemento][k] - brain[j][brain_id][k], 2)
-            d = 6*pesos[j]*math.tanh(d/6)
+            d = pesos[j]
             d0 += d
             d = 0
             try:
@@ -125,7 +124,7 @@ def dist_id(elemento, cube, brain, distancia=[], parcial=0):
             for j in range(0, 6):  # elemento 6 será usado para definir compra ou venda
                 for k in range(0, 12):
                     d += pow(cube[j][elemento][k] - brain[j][brain_id][k], 2)
-                d = pesos[j]*6*math.tanh(d/6)
+                d = pesos[j]
                 d0 += d
                 d = 0
             dist.append(d0)
@@ -167,7 +166,16 @@ def montar_cubo(dol, cube=[]):
     cube.append(frame[2:-4])
     cube.append(frame[1:-5])
     cube.append(frame[:-6])
-    print("cubo loaded")
+    k = len(cube[0][:][:])-1
+    while k >= 0:
+        if abs(cube[5][k][0]) < 2:
+            for w in range(0, 6):
+                cube[w].pop(k)
+            k -= 1
+        else:
+            k -= 1
+
+    print(f"cubo loaded. n elementos: {len(cube[0][:][:])}")
     return cube
 
     # retorna um array com quantas vezes um neuronio foi aproximado
@@ -311,22 +319,22 @@ def teste_de_acertos(cube, brain, dist_media, elemento=0):
     if (distancia <= 0.30 * dist_media[to_test]):  # descobre se o elemento é aceitavel para comparacao
         if buy_sell == 1:  # define se o elemento acertaria ou falharia
             if cube[5][elemento][0] >= 2:
-                return (0, 1)  # compra(1) e acerto(1)
+                return (1, 1)  # compra(1) e acerto(1)
             else:
-                return (0, 0)  # compra(1) e erro(0)
+                return (1, 0)  # compra(1) e erro(0)
         else:
             if (buy_sell == -1):
                 if cube[5][elemento][0] <= -2:
-                    return (-0, 1)  # venda acerto
+                    return (1, 1)  # venda acerto
                 else:
-                    return (-0, 0)  # venda e erro
+                    return (1, 0)  # venda e erro
             else:  # buy_sell==0
                 if cube[5][elemento][0] > -2 and cube[5][elemento][0] < 2:
-                    return (0, 1)  # nem compra, nem venda e acerto
+                    return (1, 1)  # nem compra, nem venda e acerto
                 else:
-                    return (0, 0)  # nem compra, nem venda e erro
+                    return (1, 0)  # nem compra, nem venda e erro
     else:
-        return (-1, 0)  # elemento não tratavel
+        return (0, 0)  # elemento não tratavel
 
 
 if __name__ == '__main__':  # Inicio
