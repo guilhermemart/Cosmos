@@ -32,9 +32,9 @@ def aproxima_neuronio(id_elemento, id_neuronio, cube, brain, tentativa=1):
     while i < 6:
         while j < 12:
             # velha_dist=pow(brain[i][id_neuronio][j]-cube[i][id_elemento][j],2)
-            brain[i][id_neuronio][j] = (1 - (alpha * 0.02)) * brain[i][id_neuronio][j] + (alpha) * 0.02 * (
+            brain[i][id_neuronio][j] = (1 - (alpha * 0.002)) * brain[i][id_neuronio][j] + (alpha) * 0.002 * (
                 cube[i][id_elemento][j])
-            brain[i][id_neuronio][j] = max(min(brain[i][id_neuronio][j], 15), -15)
+            brain[i][id_neuronio][j] = max(min(brain[i][id_neuronio][j], 25), -25)
             # nova_dist+=pow(brain[i][id_neuronio][j]-cube[i][id_elemento][j],2)
             j += 1
         i += 1
@@ -42,6 +42,31 @@ def aproxima_neuronio(id_elemento, id_neuronio, cube, brain, tentativa=1):
     # if (nova_dist<velha_dist): return True
     return False
 
+# recebe o elemento do cubo e o neuronio a ser aproximado e aproxima proporcianal a menor distancia
+# retorna true se a nova distancia for menor do que a distancia inicial
+def aproxima_neuronio_reverso(id_neuronio, cube, brain, tentativa=1):
+    alpha = 1
+    try:
+        alpha = 1 / (1 + tentativa % 5)  # ToDo maior quantidadde de aproximações, menor porcentagem de atualização
+        # alpha=1
+    except:
+        alpha = 1
+    # nova_dist = 0
+    # velha_dist = 0
+    j = 0
+    i = 0
+    while i < 6:
+        while j < 12:
+            # velha_dist=pow(brain[i][id_neuronio][j]-cube[i][id_elemento][j],2)
+            brain[i][id_neuronio][j] = (1 - (alpha * 0.2)) * brain[i][id_neuronio][j] + ((alpha) * -0.2) * (
+                brain[i][id_neuronio-int(len(brain[0][:][:])/2)][j])
+            brain[i][id_neuronio][j] = max(min(brain[i][id_neuronio][j], 25), -25)
+            # nova_dist+=pow(brain[i][id_neuronio][j]-cube[i][id_elemento][j],2)
+            j += 1
+        i += 1
+        j = 0
+    # if (nova_dist<velha_dist): return True
+    return False
 
 # separa o calculo dist_id em threads #não funcionou
 def dist_parcial_id(elemento, cube, brain, parcial, distancia):
@@ -170,7 +195,7 @@ def montar_cubo(dol, cube=[]):
     cube.append(frame[:-6])
     k = len(cube[0][:][:])-1
     while k >= 0:  # corta do cubo os elementos que nao poderão ser padroes de venda ou de compra
-        if abs(cube[5][k][0]) < 2:
+        if abs(cube[5][k][0]) < 1.5:
             for w in range(0, 6):
                 cube[w].pop(k)
         k -= 1
@@ -205,7 +230,7 @@ def aproxima_brain(cube, brain, tratados=[]):
 def randomiza_neuronio(k, brain):
     for i in range(0, 6):
         for j in range(0, 12):
-            brain[i][k][j] += ((random.random() - 0.5) / 50)
+            brain[i][k][j] += ((random.random() - 0.5)/2)
 
 
 # reajusta o neuronio menos usado
@@ -219,10 +244,10 @@ def refaz_neuronios_pouco_usados(tratados_list, brain, cube, trying):
         neuron = []
         temp = 0
         j = 0
-        i = random.randint(0, 20)  # aproxima aleatoriamente de varios inputs
-        while i < len(cube[0][:][:]):
-            aproxima_neuronio(i, k, cube, brain, trying)
-            i += random.randint(0, 20)
+        aproxima_neuronio_reverso(k, cube, brain, trying)
+        while j <len(cube[0][:][:]):
+            aproxima_neuronio(j, k, cube, brain, trying)
+            j+=int(1+20*random.random())
         randomiza_neuronio(k, brain)
         return False
     return True
@@ -318,25 +343,25 @@ def teste_de_acertos(cube, brain, dist_media, elemento=0):
             buy_sell = -1
         else:
             buy_sell = 0
-    if (distancia <= 0.30 * dist_media[to_test]):  # descobre se o elemento é aceitavel para comparacao
+    if distancia <= 0.30 * dist_media[to_test]:  # descobre se o elemento é aceitavel para comparacao
         if buy_sell == 1:  # define se o elemento acertaria ou falharia
             if cube[5][elemento][0] >= 2:
-                return (0, 1)  # compra(1) e acerto(1)
+                return 0, 1  # compra(1) e acerto(1)
             else:
-                return (0, 0)  # compra(1) e erro(0)
+                return 0, 0  # compra(1) e erro(0)
         else:
             if (buy_sell == -1):
                 if cube[5][elemento][0] <= -2:
-                    return (-0, 1)  # venda acerto
+                    return -0, 1  # venda acerto
                 else:
-                    return (-0, 0)  # venda e erro
+                    return -0, 0  # venda e erro
             else:  # buy_sell==0
-                if cube[5][elemento][0] > -2 and cube[5][elemento][0] < 2:
-                    return (0, 1)  # nem compra, nem venda e acerto
+                if -2 < cube[5][elemento][0] < 2:
+                    return 0, 1  # nem compra, nem venda e acerto
                 else:
-                    return (0, 0)  # nem compra, nem venda e erro
+                    return 0, 0  # nem compra, nem venda e erro
     else:
-        return (-1, 0)  # elemento não tratavel
+        return -1, 0  # elemento não tratavel
 
 
 if __name__ == '__main__':  # Inicio
@@ -429,7 +454,7 @@ if __name__ == '__main__':  # Inicio
             temp += buy_sell_acertos[0]  # reduz um a cada elemento que nao é valido
         prob_acertos = (acertos / temp)
         print(f' ***** prob_de_acertos *****: {prob_acertos}')
-        print(f'hora local {time.time()}')
+        print(f'hora local {time.localtime()}')
         retrying = 4 #executa mais de uma vez o ciclo para envolver os cases
         trying = 4   #probabilidade de acertos, probabilidade comum, e utilizacao menor
     # print(f'Probabilidade_compra_venda: {prob}')
