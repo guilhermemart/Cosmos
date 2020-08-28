@@ -134,9 +134,9 @@ def dist_id(elemento, cube, brain, distancia=[], parcial=0):
     imin = 0
     d = 0
     d0 = 0
-    dist = []
     j = 0
     k = 0
+    dist = [2 ** 30 for i in range(0, 30)]
     pesos = (0.85, 0.9, 0.95, 0.98, 1, 0.5)  # usar o ultimo elemento para calculo de distancia com peso reduzido
     looping_end = 0  # o elemento do cubo deve decidir se o neuronio é de compra ou venda
     looping_start = 0  # no teste de probabilidade e atualizar novamente
@@ -145,7 +145,6 @@ def dist_id(elemento, cube, brain, distancia=[], parcial=0):
             looping_end = (parcial + 1) * int(len(brain[0][:][:]) / 4)
         else:
             looping_end = len(brain[0][:][:])
-
         looping_start = parcial * int(len(brain[0][:][:]) / 4)
         for brain_id in range(looping_start, (looping_end)):
             for j in range(0, 6):  # elemento 6 será usado para definir compra ou venda
@@ -153,8 +152,11 @@ def dist_id(elemento, cube, brain, distancia=[], parcial=0):
                     d += pow(cube[j][elemento][k] - brain[j][brain_id][k], 2)
                 d *= pesos[j]
                 d0 += d
+                if brain_id>0:
+                    if d0>dist[brain_id-1]:  #comparador para quebrar o for caso já tenha estourado a dist. min.
+                        j=6
                 d = 0
-            dist.append(d0)
+            dist[brain_id]= d0
             d0 = 0
     for i in range(0, 30):
         if dist[i] < dist[imin]:
