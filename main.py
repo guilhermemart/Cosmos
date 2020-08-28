@@ -32,7 +32,7 @@ def aproxima_neuronio(id_elemento, id_neuronio, cube, brain, tentativa=1):
     while i < 6:
         while j < 12:
             # velha_dist=pow(brain[i][id_neuronio][j]-cube[i][id_elemento][j],2)
-            brain[i][id_neuronio][j] = (1 - (alpha * 0.002)) * brain[i][id_neuronio][j] + (alpha) * 0.002 * (
+            brain[i][id_neuronio][j] = (1 - (alpha * 0.02)) * brain[i][id_neuronio][j] + (alpha) * 0.02 * (
                 cube[i][id_elemento][j])
             brain[i][id_neuronio][j] = max(min(brain[i][id_neuronio][j], 25), -25)
             # nova_dist+=pow(brain[i][id_neuronio][j]-cube[i][id_elemento][j],2)
@@ -178,7 +178,10 @@ def montar_cubo(dol, cube=[]):
         elemento.append(dol[i]["close"] - dol[i]["high"])
         elemento.append(dol[i]["close"] - dol[i]["low"])
         elemento.append(dol[i]["high"] - dol[i]["low"])
-        elemento.append(dol[i]["open"] - dol[i]["close"])
+        if i>5:
+            elemento.append(dol[i]["close"] - dol[i-4]["close"])
+        else:
+            elemento.append(0)
         media[i + 1][0] = media[i][0] + ((dol[i]["close"] - media[i][0]) / 21)
         media[i + 1][1] = media[i][1] + ((dol[i]["close"] - media[i][1]) / 9)
         elemento.append(dol[i]["open"] - media[i][0])
@@ -197,7 +200,7 @@ def montar_cubo(dol, cube=[]):
     cube.append(frame[:-6])
     k = len(cube[0][:][:])-1
     while k >= 0:  # corta do cubo os elementos que nao poderão ser padroes de venda ou de compra
-        if abs(cube[5][k][0]) < 1.5:
+        if not(abs(cube[5][k][1]) > 4 or abs(cube[5][k][2]) >4):
             for w in range(0, 6):
                 cube[w].pop(k)
         k -= 1
@@ -232,7 +235,7 @@ def aproxima_brain(cube, brain, tratados=[]):
 def randomiza_neuronio(k, brain):
     for i in range(0, 6):
         for j in range(0, 12):
-            brain[i][k][j] += ((random.random() - 0.5)/2)
+            brain[i][k][j] += ((random.random() - 0.5)/4)
 
 
 # reajusta o neuronio menos usado
